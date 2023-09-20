@@ -53,17 +53,21 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
 
 router.get("/", async function (req, res, next) {
   let filter;
-  console.log("query=", req.query);
 
   if (Object.keys(req.query).length !== 0) {
     filter = req.query;
 
-    for (const key in filter) {
-      if (key === "minEmployees") {
-        filter[key] = Number(filter[key]);
-      } else if (key === "maxEmployees") {
-        filter[key] === Number(filter[key]);
-      }
+    if (filter.minEmployees) {
+      filter.minEmployees = Number(filter.minEmployees);
+    }
+
+    if (filter.maxEmployees) {
+      filter.maxEmployees = Number(filter.maxEmployees);
+    }
+
+    if (filter.minEmployees > filter.maxEmployees) {
+      throw new BadRequestError(
+        "Maximum employees must be greater than minumum employees");
     }
 
     const validator = jsonschema.validate(
