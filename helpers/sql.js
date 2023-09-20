@@ -30,4 +30,26 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   };
 }
 
-module.exports = { sqlForPartialUpdate };
+/** Accepts filter object with any or all properties:
+ * nameLike, minEmployees, maxEmployees
+ *
+ * Returns SQL WHERE clause to filter those properties
+ * with parameterized query placeholders.
+ */
+function sqlForFilter(filter) {
+  let whereClause = []
+  const keys = Object.keys(filter);
+  keys.map((key, index) => {
+    if (key==="nameLike") {
+      whereClause.push(`name ILIKE '%' || $${index+1} || '%'`)
+    } else if (key==="minEmployees") {
+      whereClause.push(`num_employees >= $${index+1}`)
+    } else {
+      whereClause.push(`num_employees <= $${index+1}`)
+    }
+  });
+
+  return `WHERE ${whereClause.join(' AND ')}`
+}
+
+module.exports = { sqlForPartialUpdate, sqlForFilter };
