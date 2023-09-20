@@ -52,6 +52,9 @@ class Company {
 
   /** Find all companies.
    *
+   * Accpets optional filter object with any or all properties of
+   * nameLike, minEmployees, and maxEmployees
+   *
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    * */
 
