@@ -65,11 +65,6 @@ router.get("/", async function (req, res, next) {
       filter.maxEmployees = Number(filter.maxEmployees);
     }
 
-    if (filter.minEmployees > filter.maxEmployees) {
-      throw new BadRequestError(
-        "Maximum employees must be greater than minumum employees");
-    }
-
     const validator = jsonschema.validate(
       filter,
       companyFilter,
