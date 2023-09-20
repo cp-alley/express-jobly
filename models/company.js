@@ -2,7 +2,7 @@
 
 const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
-const { sqlForPartialUpdate, sqlForFilter } = require("../helpers/sql");
+const { sqlForPartialUpdate } = require("../helpers/sql");
 
 /** Related functions for companies. */
 
@@ -58,13 +58,14 @@ class Company {
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    * */
 
-  static async findAll(filter) {
-    const whereClause = filter === undefined
-      ? ""
-      : sqlForFilter(filter);
-    const filterVals = filter === undefined
-      ? []
-      : Object.values(filter);
+  static async findAll(filter = {}) {
+    if (filter.minEmployees > filter.maxEmployees) {
+      throw new BadRequestError(
+        "Maximum employees must be greater than or equal to minumum employees");
+    }
+
+    const whereClause = Company.sqlForFilter(filter);
+    const filterVals = Object.values(filter);
 
     const querySql = `
     SELECT handle,
@@ -77,14 +78,6 @@ class Company {
         ORDER BY name`;
 
     const companiesRes = await db.query(querySql, filterVals);
-    // const companiesRes = await db.query(`
-    //     SELECT handle,
-    //            name,
-    //            description,
-    //            num_employees AS "numEmployees",
-    //            logo_url      AS "logoUrl"
-    //     FROM companies
-    //     ORDER BY name`);
     return companiesRes.rows;
   }
 
@@ -166,6 +159,31 @@ class Company {
     const company = result.rows[0];
 
     if (!company) throw new NotFoundError(`No company: ${handle}`);
+  }
+
+  /** Accepts filter object with any or all properties:
+ * nameLike, minEmployees, maxEmployees.
+ *
+ * If filter object is empty, returns empty string.
+ *
+ * Returns SQL WHERE clause to filter those properties
+ * with parameterized query placeholders.
+ */
+  static sqlForFilter(filter) {
+    const keys = Object.keys(filter);
+    if (keys.length === 0) return '';
+
+    const whereClause = keys.map((key, index) => {
+      if (key === "nameLike") {
+        return `name ILIKE '%' || $${index + 1} || '%'`;
+      } else if (key === "minEmployees") {
+        return `num_employees >= $${index + 1}`;
+      } else {
+        return `num_employees <= $${index + 1}`;
+      }
+    });
+
+    return `WHERE ${whereClause.join(' AND ')}`;
   }
 }
 

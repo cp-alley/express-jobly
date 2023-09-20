@@ -274,3 +274,34 @@ describe("remove", function () {
     }
   });
 });
+
+/**************************************** sqlForFilter */
+describe("sqlForFilter", function () {
+  test("returns WHERE clause for nameLike", function () {
+    const clause = Company.sqlForFilter({ nameLike: "c1" });
+    expect(clause).toEqual(`WHERE name ILIKE '%' || $1 || '%'`);
+  });
+
+  test("returns WHERE clause for minEmployees", function () {
+    const clause = Company.sqlForFilter({ minEmployees: 1 });
+    expect(clause).toEqual(`WHERE num_employees >= $1`);
+  });
+
+  test("returns WHERE clause for maxEmployees", function () {
+    const clause = Company.sqlForFilter({ maxEmployees: 1 });
+    expect(clause).toEqual(`WHERE num_employees <= $1`);
+  });
+
+  test("returns WHERE clause for multiple filters", function () {
+    const clause = Company.sqlForFilter({
+      nameLike: "c1",
+      minEmployees: "1",
+      maxEmployees: "5"
+    });
+    expect(clause).toEqual(
+      `WHERE name ILIKE '%' || $1 || '%' AND num_employees >= $2 AND num_employees <= $3`);
+  });
+
+
+
+});
