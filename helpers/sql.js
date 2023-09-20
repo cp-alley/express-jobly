@@ -21,7 +21,7 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
 
   // {firstName: 'Aliya', age: 32} => ['"first_name"=$1', '"age"=$2']
   const cols = keys.map((colName, idx) =>
-      `"${jsToSql[colName] || colName}"=$${idx + 1}`,
+    `"${jsToSql[colName] || colName}"=$${idx + 1}`,
   );
 
   return {
@@ -37,19 +37,18 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
  * with parameterized query placeholders.
  */
 function sqlForFilter(filter) {
-  let whereClause = []
   const keys = Object.keys(filter);
-  keys.map((key, index) => {
-    if (key==="nameLike") {
-      whereClause.push(`name ILIKE '%' || $${index+1} || '%'`)
-    } else if (key==="minEmployees") {
-      whereClause.push(`num_employees >= $${index+1}`)
+  const whereClause = keys.map((key, index) => {
+    if (key === "nameLike") {
+      return `name ILIKE '%' || $${index + 1} || '%'`;
+    } else if (key === "minEmployees") {
+      return `num_employees >= $${index + 1}`;
     } else {
-      whereClause.push(`num_employees <= $${index+1}`)
+      return `num_employees <= $${index + 1}`;
     }
   });
 
-  return `WHERE ${whereClause.join(' AND ')}`
+  return `WHERE ${whereClause.join(' AND ')}`;
 }
 
 module.exports = { sqlForPartialUpdate, sqlForFilter };
