@@ -52,7 +52,7 @@ class Company {
 
   /** Find all companies.
    *
-   * Accpets optional filter object with any or all properties of
+   * Accepts optional filter object with any or all properties of
    * nameLike, minEmployees, and maxEmployees
    *
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
@@ -75,7 +75,6 @@ class Company {
         FROM companies
         ${whereClause}
         ORDER BY name`;
-    console.log("sql=", querySql)
 
     const companiesRes = await db.query(querySql, filterVals);
     // const companiesRes = await db.query(`
