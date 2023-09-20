@@ -31,7 +31,7 @@ describe("sqlForPartialUpdate", function () {
 describe("sqlForFilter", function () {
   test("returns WHERE clause for nameLike", function () {
     const clause = sqlForFilter({ nameLike: "c1" });
-    expect(clause).toEqual(`WHERE name ILIKE '%' $1 '%'`);
+    expect(clause).toEqual(`WHERE name ILIKE '%' || $1 || '%'`);
   });
 
   test("returns WHERE clause for minEmployees", function () {
@@ -51,7 +51,7 @@ describe("sqlForFilter", function () {
       maxEmployees: "5"
     });
     expect(clause).toEqual(
-      `WHERE name ILIKE '%' $1 '%' AND num_employees >= $2 AND num_employees <= $3`);
+      `WHERE name ILIKE '%' || $1 || '%' AND num_employees >= $2 AND num_employees <= $3`);
   });
 
 
