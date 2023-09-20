@@ -2,7 +2,7 @@
 
 const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
-const { sqlForPartialUpdate } = require("../helpers/sql");
+const { sqlForPartialUpdate, sqlForFilter } = require("../helpers/sql");
 
 /** Related functions for companies. */
 
@@ -38,12 +38,12 @@ class Company {
                     description,
                     num_employees AS "numEmployees",
                     logo_url AS "logoUrl"`, [
-          handle,
-          name,
-          description,
-          numEmployees,
-          logoUrl,
-        ],
+      handle,
+      name,
+      description,
+      numEmployees,
+      logoUrl,
+    ],
     );
     const company = result.rows[0];
 
@@ -55,15 +55,34 @@ class Company {
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    * */
 
-  static async findAll() {
-    const companiesRes = await db.query(`
-        SELECT handle,
-               name,
-               description,
-               num_employees AS "numEmployees",
-               logo_url      AS "logoUrl"
+  static async findAll(filter) {
+    const whereClause = filter === undefined
+      ? ""
+      : sqlForFilter(filter);
+    const filterVals = filter === undefined
+      ? []
+      : Object.values(filter);
+
+    const querySql = `
+    SELECT handle,
+           name,
+           description,
+           num_employees AS "numEmployees",
+           logo_url      AS "logoUrl"
         FROM companies
-        ORDER BY name`);
+        ${whereClause}
+        ORDER BY name`;
+    console.log("sql=", querySql)
+
+    const companiesRes = await db.query(querySql, filterVals);
+    // const companiesRes = await db.query(`
+    //     SELECT handle,
+    //            name,
+    //            description,
+    //            num_employees AS "numEmployees",
+    //            logo_url      AS "logoUrl"
+    //     FROM companies
+    //     ORDER BY name`);
     return companiesRes.rows;
   }
 
@@ -106,11 +125,11 @@ class Company {
 
   static async update(handle, data) {
     const { setCols, values } = sqlForPartialUpdate(
-        data,
-        {
-          numEmployees: "num_employees",
-          logoUrl: "logo_url",
-        });
+      data,
+      {
+        numEmployees: "num_employees",
+        logoUrl: "logo_url",
+      });
     const handleVarIdx = "$" + (values.length + 1);
 
     const querySql = `
