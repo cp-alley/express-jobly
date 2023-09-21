@@ -55,7 +55,7 @@ function ensureAdmin(req, res, next) {
  * If not current user or an admin, raises Unauthorized.
  */
 
-function ensureCorrectUser(req, res, next) {
+function ensureCorrectUserOrAdmin(req, res, next) {
   const currentUser = res.locals.user;
   const hasCorrectUsername = currentUser?.username === req.params.username;
 
@@ -71,5 +71,5 @@ module.exports = {
   authenticateJWT,
   ensureLoggedIn,
   ensureAdmin,
-  ensureCorrectUser
+  ensureCorrectUserOrAdmin
 };
