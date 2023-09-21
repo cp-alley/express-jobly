@@ -6,7 +6,7 @@ const {
   authenticateJWT,
   ensureLoggedIn,
   ensureAdmin,
-  ensureCorrectUser
+  ensureCorrectUserOrAdmin
 } = require("./auth");
 
 
@@ -92,32 +92,47 @@ describe("ensureAdmin", function () {
     expect(() => ensureAdmin(req, res, next))
       .toThrow(UnauthorizedError);
   });
+
+  test("doesn't work without boolean true", function () {
+    const req = {};
+    const res = { locals: { user: { username: "test", isAdmin: "true" } } };
+    expect(() => ensureAdmin(req, res, next))
+      .toThrow(UnauthorizedError);
+  });
 });
 
-describe("ensureCorrectUser", function () {
+
+describe("ensureCorrectUserOrAdmin", function () {
   test("works", function () {
     const req = { params: { username: "test" } };
     const res = { locals: { user: { username: "test", isAdmin: false } } };
-    ensureCorrectUser(req, res, next);
+    ensureCorrectUserOrAdmin(req, res, next);
   });
 
   test("auth if admin", function () {
     const req = { params: { username: "test" } };
     const res = { locals: { user: { username: "notTheUser", isAdmin: true } } };
-    ensureCorrectUser(req, res, next);
+    ensureCorrectUserOrAdmin(req, res, next);
   });
 
   test("unauth if not current user", function () {
     const req = { params: { username: "test" } };
     const res = { locals: { user: { username: "notTheUser" } } };
-    expect(() => ensureCorrectUser(req, res, next))
+    expect(() => ensureCorrectUserOrAdmin(req, res, next))
       .toThrow(UnauthorizedError);
   });
 
   test("unauth if not logged in", function () {
     const req = { params: { username: "test" } };
     const res = { locals: {} };
-    expect(() => ensureCorrectUser(req, res, next))
+    expect(() => ensureCorrectUserOrAdmin(req, res, next))
+      .toThrow(UnauthorizedError);
+  });
+
+  test("doesn't work without admin boolean", function () {
+    const req = { params: { username: "test" } };
+    const res = { locals: { user: { username: "notTheUser", isAdmin: "true" } } };
+    expect(() => ensureCorrectUserOrAdmin(req, res, next))
       .toThrow(UnauthorizedError);
   });
 });
