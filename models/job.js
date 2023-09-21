@@ -51,6 +51,38 @@ class Job {
 
     return jobsRes.rows;
   }
+
+  /** Given a job id, return data about that job.
+   *
+   * Returns { id, title, salary, equity, company }
+   *   where company is { handle, name }
+   *
+   * Throws NotFoundError if not found.
+   */
+
+  static async get(id) {
+    const jobRes = await db.query(`
+    SELECT j.id, j.title, j.salary, j.equity, c.handle, c.name
+        FROM jobs AS j
+            JOIN companies AS c ON j.company_handle = c.handle
+        WHERE j.id = $1`,
+      [id]);
+
+    const job = jobRes.rows[0];
+
+    if (!job) throw new NotFoundError(`No job with id ${id}`);
+
+    return {
+      id: job.id,
+      title: job.title,
+      salary: job.salary,
+      equity: job.equity,
+      company: {
+        handle: job.handle,
+        name: job.name
+      }
+    };
+  }
 }
 
 module.exports = Job;

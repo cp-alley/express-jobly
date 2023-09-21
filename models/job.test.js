@@ -99,3 +99,39 @@ describe("findAll", function () {
     ]);
   });
 });
+
+/************************************** get */
+
+describe("get", function () {
+  test("works", async function () {
+    const newJob = await Job.create({
+      title: "New",
+      salary: 60000,
+      equity: 0,
+      companyHandle: "c1"
+    });
+    let id = newJob.id;
+
+    let job = await Job.get(id);
+    expect(job).toEqual({
+      id: id,
+      title: "New",
+      salary: 60000,
+      equity: "0",
+      company: {
+        handle: "c1",
+        name: "C1"
+      }
+    });
+  });
+
+  test("not found if job id doesn't exist", async function () {
+    try {
+      await Job.get(-1);
+      throw new Error("fail test, you shouldn't get here");
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+      expect(err.message).toEqual("No job with id -1");
+    }
+  });
+});
