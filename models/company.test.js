@@ -153,6 +153,18 @@ describe("findAll", function () {
       }
     ]);
   });
+
+  test("bad request for min greater than max filter", async function () {
+    let filter = { nameLike: 'c', minEmployees: 3, maxEmployees: 1 };
+    try {
+      await Company.findAll(filter);
+      throw new Error("fail test, you shouldn't get here");
+    } catch (err) {
+      expect(err instanceof BadRequestError).toBeTruthy();
+      expect(err.message).toEqual(
+        "Maximum employees must be greater than or equal to minumum employees");
+    }
+  });
 });
 
 /************************************** get */
