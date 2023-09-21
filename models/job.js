@@ -92,7 +92,7 @@ class Job {
    *
    * Data can include: { title, salary, equity }
    *
-   * Returns { id, title, salary, equity, companyHandle}
+   * Returns { id, title, salary, equity, companyHandle }
    *
    * Throws NotFoundError if not found.
    */
@@ -115,9 +115,9 @@ class Job {
     return job;
   }
 
-  /** Delete given company from database; returns undefined.
+  /** Delete given job from database; returns undefined.
    *
-   * Throws NotFoundError if company not found.
+   * Throws NotFoundError if job not found.
    **/
 
   static async remove(id) {
