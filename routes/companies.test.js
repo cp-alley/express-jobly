@@ -47,7 +47,14 @@ describe("POST /companies", function () {
       .send(newCompany)
       .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(401);
-  })
+  });
+
+  test("unauth for anon", async function () {
+    const resp = await request(app)
+      .post("/companies")
+      .send(newCompany);
+    expect(resp.statusCode).toEqual(401);
+  });
 
   test("bad request with missing data", async function () {
     const resp = await request(app)
