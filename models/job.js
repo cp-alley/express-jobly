@@ -4,6 +4,7 @@ const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
 
 /** Related functions for jobs. */
+//TODO: create, findAll, get, update, delete
 
 class Job {
   /** Create a job (from data), update db, return new job data.
@@ -35,6 +36,20 @@ class Job {
     const job = result.rows[0];
 
     return job;
+  }
+
+  /** Find all jobs.
+   *
+   * Returns [{ id, title, salary, equity, companyHandle }, ...]
+   */
+
+  static async findAll() {
+    const jobsRes = await db.query(`
+    SELECT id, title, salary, equity, company_handle AS "companyHandle"
+    FROM jobs
+    ORDER BY title`);
+
+    return jobsRes.rows;
   }
 }
 
