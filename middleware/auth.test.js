@@ -96,26 +96,26 @@ describe("ensureAdmin", function () {
 
 describe("ensureCorrectUser", function () {
   test("works", function () {
-    const req = { params: { username: "test" }};
-    const res = { locals: { user: { username: "test" } } };
+    const req = { params: { username: "test" } };
+    const res = { locals: { user: { username: "test", isAdmin: false } } };
     ensureCorrectUser(req, res, next);
   });
 
   test("auth if admin", function () {
-    const req = { params: { username: "test" }};
+    const req = { params: { username: "test" } };
     const res = { locals: { user: { username: "notTheUser", isAdmin: true } } };
     ensureCorrectUser(req, res, next);
   });
 
   test("unauth if not current user", function () {
-    const req = { params: { username: "test" }};
+    const req = { params: { username: "test" } };
     const res = { locals: { user: { username: "notTheUser" } } };
     expect(() => ensureCorrectUser(req, res, next))
       .toThrow(UnauthorizedError);
   });
 
   test("unauth if not logged in", function () {
-    const req = { params: { username: "test" }};
+    const req = { params: { username: "test" } };
     const res = { locals: {} };
     expect(() => ensureCorrectUser(req, res, next))
       .toThrow(UnauthorizedError);
