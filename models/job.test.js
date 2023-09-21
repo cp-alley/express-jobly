@@ -63,7 +63,6 @@ describe("create", function () {
       await Job.create(amazingJob);
       throw new Error("fail test, you shouldn't get here");
     } catch (err) {
-      console.log(err);
       expect(err instanceof BadRequestError).toBeTruthy();
       expect(err.message).toEqual("No such handle: mega-corp");
     }
