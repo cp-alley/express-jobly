@@ -111,4 +111,18 @@ describe("POST /auth/register", function () {
         });
     expect(resp.statusCode).toEqual(400);
   });
+
+  test("bad request with faked admin", async function () {
+    const resp = await request(app)
+        .post("/auth/register")
+        .send({
+          username: "new",
+          firstName: "first",
+          lastName: "last",
+          password: "password",
+          email: "new@email.com",
+          isAdmin: true
+        });
+    expect(resp.statusCode).toEqual(400);
+  });
 });
