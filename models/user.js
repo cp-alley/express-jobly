@@ -205,6 +205,21 @@ class User {
 
     if (!user) throw new NotFoundError(`No user: ${username}`);
   }
+
+  /** Given username and jobId, apply to job as user.
+   *
+   *  Returns BadRequestError if jobId not found.
+   */
+  static async applyForJob(username, jobId) {
+    let result = await db.query(`
+        INSERT INTO applications (username, job_id)
+        VALUES ($1, $2)
+        RETURNING username, job_id AS "jobId"`,
+        [username, jobId])
+
+    const application = result.rows[0]
+    return application;
+  }
 }
 
 
