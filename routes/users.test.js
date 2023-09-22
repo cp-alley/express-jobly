@@ -365,3 +365,47 @@ describe("DELETE /users/:username", function () {
     expect(resp.statusCode).toEqual(404);
   });
 });
+
+/******************************** POST /users/:username/jobs/:id */
+
+describe("POST /users/:username/jobs/:id", function () {
+  let testId;
+  beforeEach(async function () {
+    const idResp = await request(app).get("/jobs");
+    testId = idResp.body.jobs[0].id;
+  });
+
+  test("works for that user", async function () {
+    const resp = await request(app)
+      .post(`/users/u1/jobs/${testId}`)
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.body).toEqual({ applied: testId });
+  });
+
+  test("works for admins", async function () {
+    const resp = await request(app)
+      .post(`/users/u1/jobs/${testId}`)
+      .set("authorization", `Bearer ${adminToken}`);
+    expect(resp.body).toEqual({ applied: testId });
+  });
+
+  test("unauth for other users", async function () {
+    const resp = await request(app)
+      .post(`/users/u1/jobs/${testId}`)
+      .set("authorization", `Bearer ${u2Token}`);
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("unauth for anon", async function () {
+    const resp = await request(app)
+      .post(`/users/u1/jobs/${testId}`);
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("bad request if jobId missing", async function () {
+    const resp = await request(app)
+      .post(`/users/u1/jobs/111111111`)
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(400);
+  });
+});

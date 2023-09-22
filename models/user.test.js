@@ -215,7 +215,7 @@ describe("remove", function () {
   test("works", async function () {
     await User.remove("u1");
     const res = await db.query(
-        "SELECT * FROM users WHERE username='u1'");
+      "SELECT * FROM users WHERE username='u1'");
     expect(res.rows.length).toEqual(0);
   });
 
@@ -226,5 +226,39 @@ describe("remove", function () {
     } catch (err) {
       expect(err instanceof NotFoundError).toBeTruthy();
     }
+  });
+});
+
+/*************************************** applyForJob */
+
+describe("applyForJob", function () {
+  let testId;
+  beforeEach(async function () {
+    const idResult = await db.query(`
+    SELECT id FROM jobs WHERE title = 'j1'`);
+    testId = idResult.rows[0].id;
+  });
+
+  test("works", async function () {
+    let application = await User.applyForJob("u1", testId);
+    expect(application).toEqual({ username: "u1", jobId: testId });
+    const found = await db.query(
+      `SELECT username, job_id
+           FROM applications
+           WHERE username = 'u1'`);
+    expect(found.rows.length).toEqual(1);
+    expect(found.rows[0].username).toEqual("u1");
+    expect(found.rows[0].job_id).toEqual(testId);
+  });
+
+  test("bad request if job id not found", async function () {
+    try {
+      await User.applyForJob("u1", 11111111);
+      throw new Error("fail test, you shouldn't get here");
+    } catch (err) {
+      expect(err instanceof BadRequestError).toBeTruthy();
+      expect(err.message).toEqual(`No job with id 11111111`);
+    }
+
   });
 });
