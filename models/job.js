@@ -1,5 +1,6 @@
 "use strict";
 
+const { query } = require("express");
 const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
 const { sqlForPartialUpdate } = require("../helpers/sql");
@@ -43,11 +44,23 @@ class Job {
    * Returns [{ id, title, salary, equity, companyHandle }, ...]
    */
 
-  static async findAll() {
-    const jobsRes = await db.query(`
-    SELECT id, title, salary, equity, company_handle AS "companyHandle"
-    FROM jobs
-    ORDER BY title`);
+  static async findAll(filter = {}) {
+    const whereClause = Job.sqlForFilter(filter);
+    const filterVals = Object.values(filter);
+    console.log("clause=", whereClause, "vals=", filterVals)
+
+    const querySql = `
+        SELECT id, title, salary, equity, company_handle AS "companyHandle"
+            FROM jobs
+            ${whereClause}
+            ORDER BY title`;
+
+    const jobsRes = await db.query(querySql, filterVals);
+
+    // const jobsRes = await db.query(`
+    // SELECT id, title, salary, equity, company_handle AS "companyHandle"
+    // FROM jobs
+    // ORDER BY title`);
 
     return jobsRes.rows;
   }

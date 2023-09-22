@@ -73,7 +73,7 @@ router.get("/", async function (req, res, next) {
     }
   }
 
-  const jobs = await Job.findAll();
+  const jobs = await Job.findAll(filter);
   return res.json({ jobs });
 });
 
