@@ -6,7 +6,7 @@ const jsonschema = require("jsonschema");
 const express = require("express");
 
 const { BadRequestError } = require("../expressError");
-const { ensureLoggedIn, ensureAdmin } = require("../middleware/auth");
+const { ensureAdmin } = require("../middleware/auth");
 const Job = require("../models/job");
 
 const jobNewSchema = require("../schemas/jobNew.json");
@@ -54,6 +54,7 @@ router.post("/", ensureAdmin, async function (req, res, next) {
 router.get("/", async function (req, res, next) {
   let filter;
 
+  //TODO: JSON schema can validate an empty object from the query string
   if(Object.keys(req.query).length !== 0) {
     filter = req.query;
 
