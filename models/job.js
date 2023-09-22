@@ -46,8 +46,10 @@ class Job {
 
   static async findAll(filter = {}) {
     const whereClause = Job.sqlForFilter(filter);
-    const filterVals = Object.values(filter);
-    console.log("clause=", whereClause, "vals=", filterVals)
+
+    //Remove hasEquity since we won't pass any parameters for that
+    const { hasEquity, ...values } = filter;
+    const filterVals = Object.values(values);
 
     const querySql = `
         SELECT id, title, salary, equity, company_handle AS "companyHandle"
@@ -56,12 +58,6 @@ class Job {
             ORDER BY title`;
 
     const jobsRes = await db.query(querySql, filterVals);
-
-    // const jobsRes = await db.query(`
-    // SELECT id, title, salary, equity, company_handle AS "companyHandle"
-    // FROM jobs
-    // ORDER BY title`);
-
     return jobsRes.rows;
   }
 
