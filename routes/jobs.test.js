@@ -122,10 +122,13 @@ describe("GET /jobs", function () {
 /********************************* GET /jobs/:id */
 
 describe("GET /jobs/:id", function () {
-  test("works for anon", async function () {
+  let testId;
+  beforeEach(async function () {
     const idResp = await request(app).get("/jobs");
-    const testId = idResp.body.jobs[0].id;
+    testId = idResp.body.jobs[0].id;
+  });
 
+  test("works for anon", async function () {
     const resp = await request(app).get(`/jobs/${testId}`);
     expect(resp.body).toEqual({
       job: {
