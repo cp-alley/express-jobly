@@ -279,17 +279,20 @@ describe("remove", function () {
 describe("sqlForFilter", function () {
   test("works for title", function () {
     const clause = Job.sqlForFilter({ title: "j1" });
-    expect(clause).toEqual(`WHERE title ILIKE '%' || $1 || '%'`);
+    expect(clause.whereClause).toEqual(`WHERE title ILIKE '%' || $1 || '%'`);
+    expect(clause.values).toEqual(["j1"]);
   });
 
   test("works for minSalary", function () {
     const clause = Job.sqlForFilter({ minSalary: 20000 });
-    expect(clause).toEqual(`WHERE salary >= $1`);
+    expect(clause.whereClause).toEqual(`WHERE salary >= $1`);
+    expect(clause.values).toEqual([20000]);
   });
 
   test("works for equity", function () {
     const clause = Job.sqlForFilter({ hasEquity: true });
-    expect(clause).toEqual(`WHERE equity > 0`);
+    expect(clause.whereClause).toEqual(`WHERE equity > 0`);
+    expect(clause.values).toEqual([]);
   });
 
   test("works for multiple filters", function () {
@@ -298,8 +301,9 @@ describe("sqlForFilter", function () {
       minSalary: 20000,
       hasEquity: true
     });
-    expect(clause).toEqual(
+    expect(clause.whereClause).toEqual(
       `WHERE title ILIKE '%' || $1 || '%' AND salary >= $2 AND equity > 0`);
+      expect(clause.values).toEqual(["j", 20000]);
   });
 
   test("works for hasEquity is false", function () {
@@ -308,8 +312,9 @@ describe("sqlForFilter", function () {
       minSalary: 20000,
       hasEquity: false
     });
-    expect(clause).toEqual(
+    expect(clause.whereClause).toEqual(
       `WHERE title ILIKE '%' || $1 || '%' AND salary >= $2`);
+      expect(clause.values).toEqual(["j", 20000]);
   })
 
   test("returns empty string for no filter", function () {

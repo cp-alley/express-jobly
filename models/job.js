@@ -1,6 +1,5 @@
 "use strict";
 
-const { query } = require("express");
 const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
 const { sqlForPartialUpdate } = require("../helpers/sql");
@@ -45,11 +44,7 @@ class Job {
    */
 
   static async findAll(filter = {}) {
-    const whereClause = Job.sqlForFilter(filter);
-
-    //Remove hasEquity since we won't pass any parameters for that
-    const { hasEquity, ...values } = filter;
-    const filterVals = Object.values(values);
+    const { whereClause, values } = Job.sqlForFilter(filter);
 
     const querySql = `
         SELECT id, title, salary, equity, company_handle AS "companyHandle"
@@ -57,7 +52,7 @@ class Job {
             ${whereClause}
             ORDER BY title`;
 
-    const jobsRes = await db.query(querySql, filterVals);
+    const jobsRes = await db.query(querySql, values);
     return jobsRes.rows;
   }
 
@@ -93,7 +88,7 @@ class Job {
     };
   }
 
-  /** Update job data with `data`.
+  /** Update job
    *
    * This is a "partial update" --- it's fine if data doesn't contain all the
    * fields; this only changes provided ones.
@@ -145,8 +140,11 @@ class Job {
  *
  * If filter object is empty, returns empty string.
  *
- * Returns SQL WHERE clause to filter those properties
- * with parameterized query placeholders.
+ * Returns { whereClause, values }
+ *
+ *  SQL WHERE clause to filter those properties
+ *  with parameterized query placeholders and
+ *  array of values to be passed in
  */
 
   static sqlForFilter(filter) {
@@ -163,8 +161,14 @@ class Job {
       }
     });
 
+    //remove hasEquity key if present
+    const { hasEquity, ...values } = filter;
+    const filterVals = Object.values(values);
     //filter out undefined before joining
-    return `WHERE ${whereClause.filter(w => !!w).join(' AND ')}`;
+    return {
+      whereClause: `WHERE ${whereClause.filter(Boolean).join(' AND ')}`,
+      values: filterVals
+    }
   }
 }
 
