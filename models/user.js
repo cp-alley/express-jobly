@@ -120,6 +120,9 @@ class User {
   /** Given a username, return data about user.
    *
    * Returns { username, first_name, last_name, is_admin, jobs }
+   *   where jobs is [ jobId, ... ] of jobs applied to by that user
+   *
+   *   todo feature:
    *   where jobs is { id, title, company_handle, company_name, state }
    *
    * Throws NotFoundError if user not found.
@@ -139,6 +142,13 @@ class User {
     const user = userRes.rows[0];
 
     if (!user) throw new NotFoundError(`No user: ${username}`);
+
+    const appRes = await db.query(`
+        SELECT job_id AS jobId
+        FROM applications
+        WHERE username = $1`, [username])
+
+    user.jobs = appRes.rows;
 
     return user;
   }
