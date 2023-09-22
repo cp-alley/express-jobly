@@ -117,6 +117,34 @@ describe("GET /jobs", function () {
         ],
     });
   });
+
+  test("works with search filter", async function () {
+    const resp = await request(app).get("/jobs?title=j&minSalary=20000");
+    expect(resp.body).toEqual({
+      jobs:
+        [
+          {
+            id: expect.any(Number),
+            title: "j2",
+            salary: 20000,
+            equity: "0",
+            companyHandle: "c2"
+          },
+          {
+            id: expect.any(Number),
+            title: "j3",
+            salary: 30000,
+            equity: "0",
+            companyHandle: "c3"
+          },
+        ],
+    });
+  });
+
+  test("bad request for incorrect search filter", async function () {
+    const resp = await request(app).get("/jobs?hasEquity=0.5");
+    expect(resp.statusCode).toEqual(400);
+  });
 });
 
 /********************************* GET /jobs/:id */

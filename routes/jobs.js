@@ -10,7 +10,7 @@ const { ensureLoggedIn, ensureAdmin } = require("../middleware/auth");
 const Job = require("../models/job");
 
 const jobNewSchema = require("../schemas/jobNew.json");
-// const jobFilterSchema = require("../schemas/jobFilter.json");
+const jobFilterSchema = require("../schemas/jobFilter.json");
 const jobUpdateSchema = require("../schemas/jobUpdate.json");
 
 const router = new express.Router();
@@ -42,10 +42,37 @@ router.post("/", ensureAdmin, async function (req, res, next) {
 /** GET /  =>
  *   { jobs: [ { id, title, salary, equity, companyHandle }, ...] }
  *
+ * Can filter on provided search filters:
+ * - title (will find case-insensitive, partial matches)
+ * - minSalary
+ * - hasEquity: true - find all jobs with equity option greater than 0
+ *              false - find jobs regardless of equity option
+ *
  * Authorization required: none
  */
 
 router.get("/", async function (req, res, next) {
+  let filter;
+
+  if(Object.keys(req.query).length !== 0) {
+    filter = req.query;
+
+    if (filter.minSalary) {
+      filter.minSalary = Number(filter.minSalary);
+    }
+
+    const validator = jsonschema.validate(
+      filter,
+      jobFilterSchema,
+      { required: true }
+    );
+
+    if (!validator.valid) {
+      const errs = validator.errors.map(e => e.stack);
+      throw new BadRequestError(errs);
+    }
+  }
+
   const jobs = await Job.findAll();
   return res.json({ jobs });
 });
