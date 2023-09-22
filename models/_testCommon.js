@@ -5,8 +5,7 @@ const bcrypt = require("bcrypt");
 const db = require("../db.js");
 const { BCRYPT_WORK_FACTOR } = require("../config");
 
-let job1id;
-
+//TODO: get array of job ids and export
 async function commonBeforeAll() {
   await db.query("DELETE FROM jobs");
   // noinspection SqlWithoutWhere

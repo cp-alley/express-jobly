@@ -6,7 +6,7 @@ const Company = require("../models/company");
 const { createToken } = require("../helpers/tokens");
 const Job = require("../models/job.js");
 
-
+//TODO: get array of job ids and export
 async function commonBeforeAll() {
   await db.query("DELETE FROM jobs");
   // noinspection SqlWithoutWhere
