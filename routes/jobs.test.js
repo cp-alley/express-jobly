@@ -154,7 +154,7 @@ describe("PATCH /jobs/:id", function () {
   beforeEach(async function () {
     const idResp = await request(app).get("/jobs");
     testId = idResp.body.jobs[0].id;
-  })
+  });
 
   test("works for admins", async function () {
     const resp = await request(app)
@@ -221,5 +221,42 @@ describe("PATCH /jobs/:id", function () {
       })
       .set("authorization", `Bearer ${adminToken}`);
     expect(resp.statusCode).toEqual(400);
+  });
+});
+
+/**************************************** DELETE /jobs/:id */
+
+describe("DELETE /jobs/:handle", function () {
+  let testId;
+  beforeEach(async function () {
+    const idResp = await request(app).get("/jobs");
+    testId = idResp.body.jobs[0].id;
+  });
+
+  test("works for admins", async function () {
+    const resp = await request(app)
+      .delete(`/jobs/${testId}`)
+      .set("authorization", `Bearer ${adminToken}`);
+    expect(resp.body).toEqual({ deleted: `${testId}` });
+  });
+
+  test("unauth for users", async function () {
+    const resp = await request(app)
+      .delete(`/jobs/${testId}`)
+      .set("authorization", `Bearer ${u1Token}`);;
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("unauth for anon", async function () {
+    const resp = await request(app)
+      .delete(`/jobs/${testId}`);
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("not found for no such company", async function () {
+    const resp = await request(app)
+      .delete(`/jobs/1111111`)
+      .set("authorization", `Bearer ${adminToken}`);
+    expect(resp.statusCode).toEqual(404);
   });
 });

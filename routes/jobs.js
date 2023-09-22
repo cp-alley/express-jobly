@@ -86,7 +86,17 @@ router.patch("/:id", ensureAdmin, async function (req, res, next) {
   }
 
   const job = await Job.update(req.params.id, req.body);
-  return res.json({ job })
-})
+  return res.json({ job });
+});
+
+/** DELETE /[id] => { deleted: id }
+ *
+ * Authorization: admin
+ */
+
+router.delete("/:id", ensureAdmin, async function (req, res, next) {
+  await Job.remove(req.params.id);
+  return res.json({ deleted: req.params.id });
+});
 
 module.exports = router;
