@@ -5,7 +5,6 @@ const { BadRequestError, NotFoundError } = require("../expressError");
 const { sqlForPartialUpdate } = require("../helpers/sql");
 
 /** Related functions for jobs. */
-//TODO: create, findAll, get, update, delete
 
 class Job {
   /** Create a job (from data), update db, return new job data.
@@ -130,6 +129,33 @@ class Job {
     const job = result.rows[0];
 
     if (!job) throw new NotFoundError(`No job with id ${id}`);
+  }
+
+  /** Accepts filter object with any or all properties:
+ * title, salary, hasEquity.
+ *
+ * If filter object is empty, returns empty string.
+ *
+ * Returns SQL WHERE clause to filter those properties
+ * with parameterized query placeholders.
+ */
+
+  static sqlForFilter(filter) {
+    const keys = Object.keys(filter);
+    if (keys.length === 0) return '';
+
+    const whereClause = keys.map((key, index) => {
+      if (key === "title") {
+        return `title ILIKE '%' || $${index + 1} || '%'`;
+      } else if (key === "minSalary") {
+        return `salary >= $${index + 1}`;
+      } else if (key === "hasEquity" && filter.hasEquity) {
+        return `equity > 0`;
+      }
+    });
+
+    //filter out undefined before joining
+    return `WHERE ${whereClause.filter(w => !!w).join(' AND ')}`;
   }
 }
 

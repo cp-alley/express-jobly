@@ -213,7 +213,8 @@ describe("update", function () {
     }
   });
 
-  test("bad request with no data", async function () {try {
+  test("bad request with no data", async function () {
+    try {
       await Job.update(testId, {});
       throw new Error("fail test, you shouldn't get here");
     } catch (err) {
@@ -247,5 +248,49 @@ describe("remove", function () {
       expect(err instanceof NotFoundError).toBeTruthy();
       expect(err.message).toEqual("No job with id -1");
     }
+  });
+});
+
+/*************************************** sqlForFilter */
+
+describe("sqlForFilter", function () {
+  test("works for title", function () {
+    const clause = Job.sqlForFilter({ title: "j1" });
+    expect(clause).toEqual(`WHERE title ILIKE '%' || $1 || '%'`);
+  });
+
+  test("works for minSalary", function () {
+    const clause = Job.sqlForFilter({ minSalary: 20000 });
+    expect(clause).toEqual(`WHERE salary >= $1`);
+  });
+
+  test("works for equity", function () {
+    const clause = Job.sqlForFilter({ hasEquity: true });
+    expect(clause).toEqual(`WHERE equity > 0`);
+  });
+
+  test("works for multiple filters", function () {
+    const clause = Job.sqlForFilter({
+      title: "j",
+      minSalary: 20000,
+      hasEquity: true
+    });
+    expect(clause).toEqual(
+      `WHERE title ILIKE '%' || $1 || '%' AND salary >= $2 AND equity > 0`);
+  });
+
+  test("works for hasEquity is false", function () {
+    const clause = Job.sqlForFilter({
+      title: "j",
+      minSalary: 20000,
+      hasEquity: false
+    });
+    expect(clause).toEqual(
+      `WHERE title ILIKE '%' || $1 || '%' AND salary >= $2`);
+  })
+
+  test("returns empty string for no filter", function () {
+    const clause = Job.sqlForFilter({});
+    expect(clause).toEqual('');
   });
 });
