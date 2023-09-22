@@ -13,5 +13,6 @@
         "type": "integer"
       }
     },
-    "additionalProperties": false
+    "additionalProperties": false,
+    "required": []
   }
